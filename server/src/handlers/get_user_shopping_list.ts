@@ -1,9 +1,21 @@
+import { db } from '../db';
+import { shoppingListItemsTable } from '../db/schema';
 import { type GetUserShoppingListInput, type ShoppingListItem } from '../schema';
+import { eq, asc } from 'drizzle-orm';
 
 export const getUserShoppingList = async (input: GetUserShoppingListInput): Promise<ShoppingListItem[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all shopping list items for a specific user,
-    // ordered by order_index for proper drag and drop positioning.
-    // Only items belonging to the specified user should be returned.
-    return [];
+  try {
+    // Query shopping list items for the specific user, ordered by order_index
+    const results = await db.select()
+      .from(shoppingListItemsTable)
+      .where(eq(shoppingListItemsTable.user_id, input.user_id))
+      .orderBy(asc(shoppingListItemsTable.order_index))
+      .execute();
+
+    // Return results - no numeric conversions needed as all fields are integers/booleans/text
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch user shopping list:', error);
+    throw error;
+  }
 };
