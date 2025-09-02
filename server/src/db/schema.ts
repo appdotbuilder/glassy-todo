@@ -4,8 +4,8 @@ import { relations } from 'drizzle-orm';
 // Users table
 export const usersTable = pgTable('users', {
   id: serial('id').primaryKey(),
+  username: text('username').notNull().unique(),
   email: text('email').notNull().unique(),
-  name: text('name').notNull(),
   created_at: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -13,15 +13,16 @@ export const usersTable = pgTable('users', {
 export const shoppingListItemsTable = pgTable('shopping_list_items', {
   id: serial('id').primaryKey(),
   user_id: integer('user_id').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
-  name: text('name').notNull(),
+  title: text('title').notNull(),
+  description: text('description'), // Nullable by default
   quantity: integer('quantity').notNull().default(1),
   is_completed: boolean('is_completed').notNull().default(false),
-  order_index: integer('order_index').notNull().default(0), // For drag and drop ordering
+  position: integer('position').notNull().default(0), // For drag and drop ordering
   created_at: timestamp('created_at').defaultNow().notNull(),
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 });
 
-// Relations
+// Define relations
 export const usersRelations = relations(usersTable, ({ many }) => ({
   shoppingListItems: many(shoppingListItemsTable),
 }));
@@ -41,11 +42,6 @@ export type NewShoppingListItem = typeof shoppingListItemsTable.$inferInsert;
 
 // Important: Export all tables and relations for proper query building
 export const tables = { 
-  users: usersTable, 
-  shoppingListItems: shoppingListItemsTable 
-};
-
-export const tableRelations = {
-  usersRelations,
-  shoppingListItemsRelations
+  users: usersTable,
+  shoppingListItems: shoppingListItemsTable
 };

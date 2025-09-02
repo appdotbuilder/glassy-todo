@@ -6,14 +6,17 @@ import superjson from 'superjson';
 
 // Import schemas
 import { 
+  createUserInputSchema,
   createShoppingListItemInputSchema,
-  getUserShoppingListInputSchema,
   updateShoppingListItemInputSchema,
-  deleteShoppingListItemInputSchema,
-  reorderShoppingListItemsInputSchema
+  reorderShoppingListItemsInputSchema,
+  getUserShoppingListInputSchema,
+  deleteShoppingListItemInputSchema
 } from './schema';
 
 // Import handlers
+import { createUser } from './handlers/create_user';
+import { getUsers } from './handlers/get_users';
 import { createShoppingListItem } from './handlers/create_shopping_list_item';
 import { getUserShoppingList } from './handlers/get_user_shopping_list';
 import { updateShoppingListItem } from './handlers/update_shopping_list_item';
@@ -28,31 +31,37 @@ const publicProcedure = t.procedure;
 const router = t.router;
 
 const appRouter = router({
+  // Health check
   healthcheck: publicProcedure.query(() => {
     return { status: 'ok', timestamp: new Date().toISOString() };
   }),
 
-  // Create a new shopping list item
+  // User management
+  createUser: publicProcedure
+    .input(createUserInputSchema)
+    .mutation(({ input }) => createUser(input)),
+
+  getUsers: publicProcedure
+    .query(() => getUsers()),
+
+  // Shopping list item management
   createShoppingListItem: publicProcedure
     .input(createShoppingListItemInputSchema)
     .mutation(({ input }) => createShoppingListItem(input)),
 
-  // Get all shopping list items for a user
   getUserShoppingList: publicProcedure
     .input(getUserShoppingListInputSchema)
     .query(({ input }) => getUserShoppingList(input)),
 
-  // Update an existing shopping list item
   updateShoppingListItem: publicProcedure
     .input(updateShoppingListItemInputSchema)
     .mutation(({ input }) => updateShoppingListItem(input)),
 
-  // Delete a shopping list item
   deleteShoppingListItem: publicProcedure
     .input(deleteShoppingListItemInputSchema)
     .mutation(({ input }) => deleteShoppingListItem(input)),
 
-  // Reorder shopping list items (for drag and drop)
+  // Drag and drop functionality
   reorderShoppingListItems: publicProcedure
     .input(reorderShoppingListItemsInputSchema)
     .mutation(({ input }) => reorderShoppingListItems(input)),
